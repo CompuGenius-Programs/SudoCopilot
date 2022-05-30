@@ -1,6 +1,20 @@
 import random
 
 
+def empty_board():
+    # create an empty board
+    board = []
+    for i in range(9):
+        board.append([])
+        for j in range(9):
+            board[i].append(0)
+    return board
+
+
+original_board = empty_board()
+solved_board = empty_board()
+
+
 def generate_board_from_spot_inputs():
     board = []
     for i in range(9):
@@ -16,54 +30,67 @@ def generate_board_from_spot_inputs():
 
 
 def generate_sudoku_board():
-    board = []
-    for i in range(9):
-        board.append([])
-        for j in range(9):
-            board[i].append(0)
+    try:
+        board = []
+        for i in range(9):
+            board.append([])
+            for j in range(9):
+                board[i].append(0)
 
-    # generate valid numbers for each spot
-    for i in range(9):
-        for j in range(9):
-            board[i][j] = generate_sudoku_number(i, j, board)
+        # generate valid numbers for each spot
+        for i in range(9):
+            for j in range(9):
+                spot = generate_sudoku_number(i, j, board)
+                if spot == 0:
+                    return generate_sudoku_board()
+                board[i][j] = spot
 
-    # remove some numbers to make the board harder
-    for i in range(9):
-        for j in range(9):
-            if random.randint(0, 1) == 0:
-                board[i][j] = 0
-    return board
+        global original_board
+        original_board = board
+
+        # change some spots to 0 to ensure only one correct solution
+        for i in range(9):
+            for j in range(9):
+                if random.randint(0, 9) == 0:
+                    board[i][j] = 0
+        return board
+    except RecursionError:
+        return generate_sudoku_board()
 
 
 def generate_sudoku_number(row, col, board):
     # generate a valid sudoku number for this spot
     # check if the spot is already filled
-    if board[row][col] != 0:
-        return board[row][col]
-    # generate a valid number
-    valid_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    # remove numbers that are already in the row
-    for i in range(9):
-        if board[row][i] in valid_numbers:
-            valid_numbers.remove(board[row][i])
-    # remove numbers that are already in the column
-    for i in range(9):
-        if board[i][col] in valid_numbers:
-            valid_numbers.remove(board[i][col])
-    # remove numbers that are already in the 3x3 box
-    for i in range(3):
-        for j in range(3):
-            if board[row - row % 3 + i][col - col % 3 + j] in valid_numbers:
-                valid_numbers.remove(board[row - row % 3 + i][col - col % 3 + j])
-    # if there are no valid numbers, return 0
-    if len(valid_numbers) == 0:
+    try:
+        if board[row][col] != 0:
+            return board[row][col]
+        # generate a valid number
+        valid_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        # remove numbers that are already in the row
+        for i in range(9):
+            if board[row][i] in valid_numbers:
+                valid_numbers.remove(board[row][i])
+        # remove numbers that are already in the column
+        for i in range(9):
+            if board[i][col] in valid_numbers:
+                valid_numbers.remove(board[i][col])
+        # remove numbers that are already in the 3x3 box
+        for i in range(3):
+            for j in range(3):
+                if board[row - row % 3 + i][col - col % 3 + j] in valid_numbers:
+                    valid_numbers.remove(board[row - row % 3 + i][col - col % 3 + j])
+        # if there are no valid numbers, return 0
+        if len(valid_numbers) == 0:
+            return 0
+        # return a valid number considering all other spots
+        return random.choice(valid_numbers)
+    except RecursionError:
         return 0
-    # return a valid number considering all other spots
-    return random.choice(valid_numbers)
 
 
-def print_board(board):
+def print_board(tag, board):
     # print a sudoku board nicely formatted in ascii
+    print(tag)
     for i in range(9):
         if i % 3 == 0 and i != 0:
             print("- - - - - - - - - - - -")
@@ -107,7 +134,9 @@ def solve_sudoku(board):
     # solve the sudoku board
     # check if the board is already solved
     if is_solved(board):
-        print_board(board)
+        global solved_board
+        solved_board = board
+        print_board("SOLVED BOARD", board)
         return
     # find the first empty spot
     for i in range(9):
@@ -130,23 +159,32 @@ def solve_sudoku(board):
 
 
 def main():
-    # board = generate_sudoku_board()
+    board = generate_sudoku_board()
     # board = generate_board_from_spot_inputs()
-    board = [[0, 0, 6, 0, 9, 0, 2, 0, 0],
-             [0, 0, 0, 7, 0, 2, 0, 0, 0],
-             [0, 9, 0, 5, 0, 8, 0, 7, 0],
-             [9, 0, 0, 0, 3, 0, 0, 0, 6],
-             [7, 5, 0, 0, 0, 0, 0, 1, 9],
-             [1, 0, 0, 0, 4, 0, 0, 0, 5],
-             [0, 1, 0, 3, 0, 9, 0, 8, 0],
-             [0, 0, 0, 2, 0, 1, 0, 0, 0],
-             [0, 0, 9, 0, 8, 0, 1, 0, 0]]
-    print_board(board)
+    # board = [[0, 0, 6, 0, 9, 0, 2, 0, 0],
+    #          [0, 0, 0, 7, 0, 2, 0, 0, 0],
+    #          [0, 9, 0, 5, 0, 8, 0, 7, 0],
+    #          [9, 0, 0, 0, 3, 0, 0, 0, 6],
+    #          [7, 5, 0, 0, 0, 0, 0, 1, 9],
+    #          [1, 0, 0, 0, 4, 0, 0, 0, 5],
+    #          [0, 1, 0, 3, 0, 9, 0, 8, 0],
+    #          [0, 0, 0, 2, 0, 1, 0, 0, 0],
+    #          [0, 0, 9, 0, 8, 0, 1, 0, 0]]
+    print_board("GENERATED BOARD", board)
 
+    input("Press enter to solve the board ...")
     print()
     print("Solving...")
     solve_sudoku(board)
 
+    if original_board != solved_board:
+        raise Exception("Sudoku board was not solved with the intended solution")
+    else:
+        print("Solved correctly!")
+
+    print()
+
 
 if __name__ == '__main__':
     main()
+
