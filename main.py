@@ -159,17 +159,20 @@ def solve_sudoku(board):
 
 
 def main():
-    board = generate_sudoku_board()
-    # board = generate_board_from_spot_inputs()
-    # board = [[0, 0, 6, 0, 9, 0, 2, 0, 0],
-    #          [0, 0, 0, 7, 0, 2, 0, 0, 0],
-    #          [0, 9, 0, 5, 0, 8, 0, 7, 0],
-    #          [9, 0, 0, 0, 3, 0, 0, 0, 6],
-    #          [7, 5, 0, 0, 0, 0, 0, 1, 9],
-    #          [1, 0, 0, 0, 4, 0, 0, 0, 5],
-    #          [0, 1, 0, 3, 0, 9, 0, 8, 0],
-    #          [0, 0, 0, 2, 0, 1, 0, 0, 0],
-    #          [0, 0, 9, 0, 8, 0, 1, 0, 0]]
+    generate_board = False
+    if generate_board:
+        board = generate_sudoku_board()
+    else:
+        # board = generate_board_from_spot_inputs()
+        board = [[0, 0, 2, 0, 0, 4, 0, 0, 0],
+                 [1, 3, 6, 0, 0, 0, 4, 0, 0],
+                 [0, 9, 0, 1, 0, 5, 0, 2, 0],
+                 [5, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 4, 2, 8, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0, 0, 0, 1],
+                 [0, 6, 0, 9, 0, 1, 0, 7, 0],
+                 [0, 0, 7, 0, 0, 0, 6, 5, 9],
+                 [0, 0, 0, 6, 0, 0, 3, 0, 0]]
     print_board("GENERATED BOARD", board)
 
     input("Press enter to solve the board ...")
@@ -177,10 +180,11 @@ def main():
     print("Solving...")
     solve_sudoku(board)
 
-    if original_board != solved_board:
-        raise Exception("Sudoku board was not solved with the intended solution")
-    else:
-        print("Solved correctly!")
+    if generate_board:
+        if original_board != solved_board:
+            raise Exception("Sudoku board was not solved with the intended solution")
+        else:
+            print("Solved correctly!")
 
     print()
 
