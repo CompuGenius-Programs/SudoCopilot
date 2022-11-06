@@ -130,6 +130,8 @@ def solve_sudoku(board):
         solved_board = board
         print_board("SOLVED BOARD", board)
         return
+    row = 0
+    col = 0
     # find the first empty spot
     for i in range(9):
         for j in range(9):
@@ -182,4 +184,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
