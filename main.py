@@ -16,11 +16,7 @@ solved_board = empty_board()
 
 
 def generate_board_from_spot_inputs():
-    board = []
-    for i in range(9):
-        board.append([])
-        for j in range(9):
-            board[i].append(0)
+    board = empty_board()
 
     for i in range(9):
         for j in range(9):
@@ -31,11 +27,7 @@ def generate_board_from_spot_inputs():
 
 def generate_sudoku_board():
     try:
-        board = []
-        for i in range(9):
-            board.append([])
-            for j in range(9):
-                board[i].append(0)
+        board = empty_board()
 
         # generate valid numbers for each spot
         for i in range(9):
@@ -175,16 +167,15 @@ def main():
                  [0, 0, 0, 6, 0, 0, 3, 0, 0]]
     print_board("GENERATED BOARD", board)
 
-    input("Press enter to solve the board ...")
-    print()
-    print("Solving...")
+    input("\nPress enter to solve the board ...")
+    print("\nSolving...\n")
     solve_sudoku(board)
 
     if generate_board:
         if original_board != solved_board:
             raise Exception("Sudoku board was not solved with the intended solution")
         else:
-            print("Solved correctly!")
+            print("\nSolved correctly!")
 
     print()
 
