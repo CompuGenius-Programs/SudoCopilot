@@ -11,10 +11,6 @@ def empty_board():
     return board
 
 
-original_board = empty_board()
-solved_board = empty_board()
-
-
 def generate_board_from_spot_inputs():
     board = empty_board()
 
@@ -183,4 +179,7 @@ def main():
 
 
 if __name__ == '__main__':
+    original_board = empty_board()
+    solved_board = empty_board()
+
     main()
