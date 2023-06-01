@@ -1,4 +1,5 @@
 import random
+import tkinter as tk
 
 
 def empty_board():
@@ -8,16 +9,6 @@ def empty_board():
         board.append([])
         for j in range(9):
             board[i].append(0)
-    return board
-
-
-def generate_board_from_spot_inputs():
-    board = empty_board()
-
-    for i in range(9):
-        for j in range(9):
-            board[i][j] = int(input("Enter a number for spot " + str(i + 1) + "," + str(j + 1) + ": "))
-
     return board
 
 
@@ -76,19 +67,15 @@ def generate_sudoku_number(row, col, board):
         return 0
 
 
-def print_board(tag, board):
-    # print a sudoku board nicely formatted in ascii
-    print(tag)
+def display_board(board):
+    # display the board in the GUI
     for i in range(9):
-        if i % 3 == 0 and i != 0:
-            print("- - - - - - - - - - - -")
         for j in range(9):
-            if j % 3 == 0 and j != 0:
-                print(" | ", end="")
-            if j == 8:
-                print(board[i][j])
+            if board[i][j] == 0:
+                entry_fields[i][j].delete(0, tk.END)
             else:
-                print(str(board[i][j]) + " ", end="")
+                entry_fields[i][j].delete(0, tk.END)
+                entry_fields[i][j].insert(0, board[i][j])
 
 
 def is_solved(board):
@@ -124,7 +111,7 @@ def solve_sudoku(board):
     if is_solved(board):
         global solved_board
         solved_board = board
-        print_board("SOLVED BOARD", board)
+        display_board(board)
         return
     row = 0
     col = 0
@@ -148,37 +135,96 @@ def solve_sudoku(board):
         return
 
 
+def generate_board_gui():
+    button = tk.Button(root, text="Solve", command=solve_gui_board)
+    reset_button = tk.Button(root, text="Reset", command=reset_gui_board)
+    button.grid(row=10, column=0, columnspan=4, sticky="nsew")
+    reset_button.grid(row=10, column=4, columnspan=4, sticky="nsew")
+
+    entry_fields[0][0].focus_set()
+
+    root.mainloop()
+
+
+def reset_gui_board():
+    # reset the board to the original state
+    global entry_fields
+    entry_fields = create_entry_fields()
+    display_board(empty_board())
+
+    entry_fields[0][0].focus_set()
+
+
+def create_entry_fields():
+    # create entry fields for the board. make the border of each 3 by 3 box a different color
+    fields = []
+    for i in range(9):
+        fields.append([])
+        for j in range(9):
+            if (i < 3 or i > 5) and (j < 3 or j > 5) or (2 < i < 6) and (2 < j < 6):
+                entry = tk.Entry(root, width=2, font="Arial 20 bold", fg="black", bg="white", justify="center")
+            else:
+                entry = tk.Entry(root, width=2, font="Arial 20 bold", fg="black", bg="#CCCCCC", justify="center")
+            entry.bind('<Key>', lambda event, row=i, col=j: handle_key(event, row, col))
+            entry.grid(row=i, column=j)
+            fields[i].append(entry)
+    return fields
+
+
+def handle_key(event, row, col):
+    entry = entry_fields[row][col]
+    entry.delete(0, tk.END)
+    if event.keysym.isdigit() or event.keysym == 'Tab':
+        if event.keysym == '0':
+            root.after(0, entry.delete, 0, tk.END)
+        next_col = (col + 1) % 9
+        next_row = row + 1 if next_col == 0 else row
+        if next_row != 9:
+            entry_fields[next_row][next_col].focus()
+        else:
+            root.after(0, solve_gui_board)
+
+    elif event.keysym == 'BackSpace':
+        prev_col = (col - 1) % 9
+        prev_row = row - 1 if prev_col == 8 else row
+        entry = entry_fields[prev_row][prev_col]
+        entry.delete(0, tk.END)
+        entry.focus()
+
+
+def solve_gui_board():
+    board = empty_board()
+
+    for i in range(9):
+        for j in range(9):
+            num = entry_fields[i][j].get()
+            if num == '':
+                num = 0
+            board[i][j] = int(num)
+
+    for i in range(9):
+        for j in range(9):
+            if board[i][j] != 0:
+                entry_fields[i][j].config(fg="gray")
+
+    solve_sudoku(board)
+
+
 def main():
     generate_board = False
     if generate_board:
         board = generate_sudoku_board()
-    else:
-        # board = generate_board_from_spot_inputs()
-        board = [[0, 4, 0, 0, 1, 9, 0, 7, 6],
-                 [8, 0, 0, 0, 0, 0, 0, 0, 3],
-                 [0, 0, 0, 6, 0, 0, 0, 0, 0],
-                 [0, 9, 0, 0, 2, 7, 0, 1, 0],
-                 [0, 0, 4, 0, 0, 0, 9, 0, 0],
-                 [0, 0, 0, 0, 0, 5, 0, 0, 0],
-                 [0, 0, 3, 0, 6, 2, 0, 0, 7],
-                 [0, 2, 0, 5, 0, 0, 0, 0, 0],
-                 [0, 0, 0, 4, 0, 0, 0, 6, 0]]
-    print_board("GENERATED BOARD", board)
+        display_board(board)
 
-    input("\nPress enter to solve the board ...")
-    print("\nSolving...\n")
-    solve_sudoku(board)
-
-    if generate_board:
-        if original_board != solved_board:
-            raise Exception("Sudoku board was not solved with the intended solution")
-        else:
-            print("\nSolved correctly!")
-
-    print()
+    generate_board_gui()
 
 
 if __name__ == '__main__':
+    root = tk.Tk()
+    root.title("Sudoku Solver")
+
+    entry_fields = create_entry_fields()
+
     original_board = empty_board()
     solved_board = empty_board()
 
